@@ -17,6 +17,9 @@
     <Setting Name="ShowInsertInFullscreen" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="UseCorporateDesign2026" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
     <Setting Name="LogoAsCornerlogo" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>

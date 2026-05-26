@@ -27,6 +27,7 @@ namespace HgSoftware.InsertCreator.ViewModel
             UseGreenScreen = Properties.Settings.Default.UseGreenscreen;
             ShowMetaData = Properties.Settings.Default.ShowComponistAndAutor;
             ShowInsertInFullscreen = Properties.Settings.Default.ShowInsertInFullscreen;
+            UseCorporateDesign2026 = Properties.Settings.Default.UseCorporateDesign2026;
             ShowPreviewPicture = Properties.Settings.Default.ShowPreviewPicture;
             LogoAsCornerbug = Properties.Settings.Default.LogoAsCornerlogo;
             CalendarUrl = Properties.Settings.Default.CalendarUrl;
@@ -135,6 +136,19 @@ namespace HgSoftware.InsertCreator.ViewModel
                     SetValue(value);
                     Properties.Settings.Default.ShowInsertInFullscreen = value;
                     OnUpdateFullscreenMode?.Invoke(this, value);
+                }
+            }
+        }
+
+        public bool UseCorporateDesign2026
+        {
+            get { return GetValue<bool>(); }
+            set
+            {
+                if (UseCorporateDesign2026 != value)
+                {
+                    SetValue(value);
+                    Properties.Settings.Default.UseCorporateDesign2026 = value;
                 }
             }
         }
