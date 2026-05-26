@@ -1,5 +1,4 @@
 ﻿using HgSoftware.InsertCreator.ViewModel;
-using Microsoft.DwayneNeed.Shapes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

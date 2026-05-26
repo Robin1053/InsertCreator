@@ -15,17 +15,18 @@ namespace HgSoftware.InsertCreator.Model
     {
         #region Private Fields
 
-        private readonly PictureReader _pictureReader = new PictureReader();
         private readonly PositionData _positionData;
+        private readonly CorporateDesignPositionData _corporateDesignPositionData;
         private readonly BiblewordPositionData _biblewordPositionData;
 
         #endregion Private Fields
 
         #region Public Constructors
 
-        public FadeInWriter(PositionData positionData, BiblewordPositionData biblewordPositionData)
+        public FadeInWriter(PositionData positionData, CorporateDesignPositionData corporateDesignPositionData, BiblewordPositionData biblewordPositionData)
         {
             _positionData = positionData;
+            _corporateDesignPositionData = corporateDesignPositionData;
             _biblewordPositionData = biblewordPositionData;
             CurrentFade = LoadFrame(!Properties.Settings.Default.UseGreenscreen, Properties.Settings.Default.LogoAsCornerlogo);
         }
@@ -62,13 +63,7 @@ namespace HgSoftware.InsertCreator.Model
             OnInsertUpdate?.Invoke(this, image);
         }
 
-        //public float TextPositionX()
-        //{
-        //    if (Properties.Settings.Default.LogoOnLefthand)
-        //        return 280;
-        //    return 70;
-        //}
-
+     
         public void WriteFade(IInsertData insert)
         {
             Bitmap image = SelectFadeWriter(insert);
@@ -134,6 +129,9 @@ namespace HgSoftware.InsertCreator.Model
 
         private Bitmap CreateCustomInsertDouble(string textLaneOne, string textLaneTwo, bool transparent = true, bool useCornerBug = false)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignInsert(textLaneOne, textLaneTwo, transparent, useCornerBug);
+
             Bitmap image = LoadFrame(transparent, useCornerBug);
             var drawingTool = Graphics.FromImage(image);
             DrawRectangle(drawingTool, _positionData);
@@ -155,6 +153,9 @@ namespace HgSoftware.InsertCreator.Model
 
         private Bitmap CreateCustomInsertSingle(string text, bool transparent = true, bool useCornerBug = false)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignInsert(text, string.Empty, transparent, useCornerBug);
+
             Bitmap image = LoadFrame(transparent, useCornerBug);
             var drawingTool = Graphics.FromImage(image);
             DrawRectangle(drawingTool, _positionData);
@@ -171,6 +172,9 @@ namespace HgSoftware.InsertCreator.Model
 
         private Bitmap CreateBibleInsert(BibleData bibleData, bool transparent = true, bool useCornerBug = false)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignInsert("Bibelwort", $"{bibleData.BibleBook} {bibleData.BibleChapter}, {bibleData.BibleVerse}", transparent, useCornerBug);
+
             Bitmap image = LoadFrame(transparent, useCornerBug);
             var drawingTool = Graphics.FromImage(image);
             DrawRectangle(drawingTool, _positionData);
@@ -182,16 +186,20 @@ namespace HgSoftware.InsertCreator.Model
 
             drawingTool.DrawString(
              $"{bibleData.BibleBook} {bibleData.BibleChapter}, {bibleData.BibleVerse}",
-             _positionData.FontTextTwoRowSecondLine,
-             new SolidBrush(Color.Black), _positionData.TextTwoRowSecondLinePosition);
+               _positionData.FontTextTwoRowSecondLine,
+               new SolidBrush(Color.Black), _positionData.TextTwoRowSecondLinePosition);
 
             DrawLogo(drawingTool, _positionData);
 
             return image;
         }
 
+     
         private Bitmap CreateHymnalInsertPicture(HymnalData hymnalData, bool transparent = true, bool useCornerBug = false)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignInsert($"{hymnalData.Book} {hymnalData.Number}{hymnalData.SongVerses}", hymnalData.Name, transparent, useCornerBug);
+
             Bitmap image = LoadFrame(transparent, useCornerBug);
 
             var drawingTool = Graphics.FromImage(image);
@@ -215,6 +223,9 @@ namespace HgSoftware.InsertCreator.Model
 
         private Bitmap CreateHymnalInsertPictureMeta(HymnalData hymnalData, bool transparent, bool useCornerBug)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignInsert($"{hymnalData.Book} {hymnalData.Number}{hymnalData.SongVerses}", hymnalData.Name, transparent, useCornerBug);
+
             Bitmap image = LoadFrame(transparent, useCornerBug);
 
             var drawingTool = Graphics.FromImage(image);
@@ -248,6 +259,9 @@ namespace HgSoftware.InsertCreator.Model
 
         private Bitmap CreateMinistrieInsert(MinistryGridViewModel ministry, bool transparent = true, bool useCornerBug = false)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignInsert($"{ministry.ForeName} {ministry.SureName}", ministry.Function, transparent, useCornerBug);
+
             Bitmap image = LoadFrame(transparent, useCornerBug);
 
             var drawingTool = Graphics.FromImage(image);
@@ -265,6 +279,50 @@ namespace HgSoftware.InsertCreator.Model
 
             DrawLogo(drawingTool, _positionData);
             return image;
+        }
+
+        private Bitmap CreateCorporateDesignInsert(string firstLine, string secondLine, bool transparent = true, bool useCornerBug = false)
+        {
+            Bitmap image = LoadFrame(transparent, useCornerBug);
+            var drawingTool = Graphics.FromImage(image);
+
+            DrawCorporateBackground(drawingTool);
+            DrawCorporateWhiteStripe(drawingTool);
+            DrawCorporateText(drawingTool, firstLine, secondLine);
+
+            return image;
+        }
+
+        private void DrawCorporateBackground(Graphics drawingTool)
+        {
+            using (var brush = new SolidBrush(_corporateDesignPositionData.BarColor))
+            {
+                drawingTool.FillRectangle(brush, new Rectangle(_corporateDesignPositionData.FirstBarPosition, _corporateDesignPositionData.FirstBarSize));
+                drawingTool.FillRectangle(brush, new Rectangle(_corporateDesignPositionData.SecondBarPosition, _corporateDesignPositionData.SecondBarSize));
+            }
+        }
+
+        private void DrawCorporateText(Graphics drawingTool, string firstLine, string secondLine)
+        {
+            using (var firstBrush = new SolidBrush(_corporateDesignPositionData.TextColor))
+            using (var secondBrush = new SolidBrush(_corporateDesignPositionData.TextColor))
+            using (var firstFormat = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap })
+            using (var secondFormat = new StringFormat { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center, FormatFlags = StringFormatFlags.NoWrap })
+            {
+                var firstBounds = new RectangleF(_corporateDesignPositionData.FirstTextPosition.X, _corporateDesignPositionData.FirstBarPosition.Y, _corporateDesignPositionData.FirstBarSize.Width - (_corporateDesignPositionData.FirstTextPosition.X - _corporateDesignPositionData.FirstBarPosition.X), _corporateDesignPositionData.FirstBarSize.Height);
+                var secondBounds = new RectangleF(_corporateDesignPositionData.SecondTextPosition.X, _corporateDesignPositionData.SecondBarPosition.Y, _corporateDesignPositionData.SecondBarSize.Width - (_corporateDesignPositionData.SecondTextPosition.X - _corporateDesignPositionData.SecondBarPosition.X), _corporateDesignPositionData.SecondBarSize.Height);
+
+                drawingTool.DrawString(firstLine ?? string.Empty, _corporateDesignPositionData.FirstTextFont, firstBrush, firstBounds, firstFormat);
+                drawingTool.DrawString(secondLine ?? string.Empty, _corporateDesignPositionData.SecondTextFont, secondBrush, secondBounds, secondFormat);
+            }
+        }
+
+        private void DrawCorporateWhiteStripe(Graphics drawingTool)
+        {
+            using (var brush = new SolidBrush(_corporateDesignPositionData.StripeColor))
+            {
+                drawingTool.FillRectangle(brush, new Rectangle(_corporateDesignPositionData.WhiteStripePosition.X, _corporateDesignPositionData.FirstBarPosition.Y, _corporateDesignPositionData.WhiteStripeWidth, (_corporateDesignPositionData.SecondBarPosition.Y + _corporateDesignPositionData.SecondBarSize.Height) - _corporateDesignPositionData.FirstBarPosition.Y));
+            }
         }
 
         private void DrawLogo(Graphics drawingTool, IPositionData positionData)
@@ -298,9 +356,11 @@ namespace HgSoftware.InsertCreator.Model
             if (useCornerBug && File.Exists($"{Environment.GetEnvironmentVariable("userprofile")}/InsertCreator/Logo.png"))
             {
                 var drawingTool = Graphics.FromImage(image);
-
                 var logoImage = new Bitmap($"{Environment.GetEnvironmentVariable("userprofile")}/InsertCreator/Logo.png");
-                drawingTool.DrawImage(logoImage, new Rectangle(Point.Round(_positionData.CornerbugPosition), new Size(_positionData.SizeCornerbug, _positionData.SizeCornerbug)));
+                var cornerbugPosition = Properties.Settings.Default.UseCorporateDesign2026 ? _corporateDesignPositionData.CornerbugPosition : _positionData.CornerbugPosition;
+                var cornerbugSize = Properties.Settings.Default.UseCorporateDesign2026 ? _corporateDesignPositionData.SizeCornerbug : _positionData.SizeCornerbug;
+
+                drawingTool.DrawImage(logoImage, new Rectangle(Point.Round(cornerbugPosition), new Size(cornerbugSize, cornerbugSize)));
             }
             return image;
         }
@@ -341,6 +401,9 @@ namespace HgSoftware.InsertCreator.Model
 
         private Bitmap CreateFullscreenBibleInsert(BibleData bibleData, bool transparent)
         {
+            if (Properties.Settings.Default.UseCorporateDesign2026)
+                return CreateCorporateDesignFullscreenBibleInsert(bibleData, transparent);
+
             Bitmap image = LoadFrame(transparent, false);
             var drawingTool = Graphics.FromImage(image);
             DrawRectangle(drawingTool, _biblewordPositionData);
@@ -354,39 +417,75 @@ namespace HgSoftware.InsertCreator.Model
             drawingTool.DrawString(
           $"{bibleData.BibleBook} {bibleData.BibleChapter}, {bibleData.BibleVerse}",
           _biblewordPositionData.FontTextHeadline,
-          new SolidBrush(Color.Black), _biblewordPositionData.HeadlineTextSecondLine);
+           new SolidBrush(Color.Black), _biblewordPositionData.HeadlineTextSecondLine);
 
             DrawBibleText(drawingTool, bibleData.BibleText);
 
             return image;
         }
 
-        private void DrawBibleText(Graphics drawingTool, string bibleText)
+        private Bitmap CreateCorporateDesignFullscreenBibleInsert(BibleData bibleData, bool transparent)
+        {
+            Bitmap image = LoadFrame(transparent, false);
+            var drawingTool = Graphics.FromImage(image);
+
+            var boxRectangle = new Rectangle(_biblewordPositionData.RectanglePosition, _biblewordPositionData.SizeRectangle);
+            using (var boxBrush = new SolidBrush(_corporateDesignPositionData.BarColor))
+            using (var stripeBrush = new SolidBrush(_corporateDesignPositionData.StripeColor))
+            {
+                drawingTool.FillRectangle(boxBrush, boxRectangle);
+                drawingTool.FillRectangle(stripeBrush, new Rectangle(boxRectangle.X, boxRectangle.Y, _corporateDesignPositionData.WhiteStripeWidth, boxRectangle.Height));
+            }
+
+            
+            using (var textBrush = new SolidBrush(_corporateDesignPositionData.TextColor))
+            {
+                drawingTool.DrawString(
+               "Bibelwort",
+               _biblewordPositionData.FontTextHeadline,
+               textBrush, _biblewordPositionData.HeadlineTextFirstLine);
+
+                drawingTool.DrawString(
+              $"{bibleData.BibleBook} {bibleData.BibleChapter}, {bibleData.BibleVerse}",
+              _biblewordPositionData.FontTextHeadline,
+               textBrush, _biblewordPositionData.HeadlineTextSecondLine);
+            }
+
+            DrawBibleText(drawingTool, bibleData.BibleText, _corporateDesignPositionData.TextColor);
+
+            return image;
+        }
+
+        private void DrawBibleText(Graphics drawingTool, string bibleText, Color? textColor = null)
         {
             var bibleTextWithoutLinks = Regex.Replace(bibleText, "[ ][(].+[)]", string.Empty);
 
             var verses = Regex.Split(bibleTextWithoutLinks.TrimStart(' ').TrimStart(Convert.ToChar(160)), "([0-9]+.[^0-9]+)").Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
+            var color = textColor ?? Color.Black;
 
             var count = 0;
 
-            foreach (var item in verses)
+            using (var textBrush = new SolidBrush(color))
             {
-                var verse = Regex.Match(item, "[0-9]+").Value;
-                var text = item.Replace($"{verse}", "").Trim(' ').Trim(Convert.ToChar(160)).Replace(Convert.ToChar(160), ' ');
-
-                if (count == 8)
-                    return;
-
-                drawingTool.DrawString(verse, _biblewordPositionData.FontTextBody, new SolidBrush(Color.Black), _biblewordPositionData.Versenumbers[count]);
-
-                var lines = text.JustifyParagraph(_biblewordPositionData.FontTextBody, _biblewordPositionData.MaxTextLength).Split(new string[] { "\r\n" }, StringSplitOptions.None);
-
-                foreach (var line in lines)
+                foreach (var item in verses)
                 {
+                    var verse = Regex.Match(item, "[0-9]+").Value;
+                    var text = item.Replace($"{verse}", "").Trim(' ').Trim(Convert.ToChar(160)).Replace(Convert.ToChar(160), ' ');
+
                     if (count == 8)
                         return;
-                    drawingTool.DrawString(line, _biblewordPositionData.FontTextBody, new SolidBrush(Color.Black), _biblewordPositionData.TextLines[count]);
-                    count++;
+
+                    drawingTool.DrawString(verse, _biblewordPositionData.FontTextBody, textBrush, _biblewordPositionData.Versenumbers[count]);
+
+                    var lines = text.JustifyParagraph(_biblewordPositionData.FontTextBody, _biblewordPositionData.MaxTextLength).Split(new string[] { "\r\n" }, StringSplitOptions.None);
+
+                    foreach (var line in lines)
+                    {
+                        if (count == 8)
+                            return;
+                        drawingTool.DrawString(line, _biblewordPositionData.FontTextBody, textBrush, _biblewordPositionData.TextLines[count]);
+                        count++;
+                    }
                 }
             }
         }

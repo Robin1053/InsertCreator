@@ -82,7 +82,19 @@ namespace HgSoftware.InsertCreator.Properties {
                 this["ShowInsertInFullscreen"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool UseCorporateDesign2026 {
+            get {
+                return ((bool)(this["UseCorporateDesign2026"]));
+            }
+            set {
+                this["UseCorporateDesign2026"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]

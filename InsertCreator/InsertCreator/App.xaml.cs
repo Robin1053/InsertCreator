@@ -22,11 +22,13 @@ namespace HgSoftware.InsertCreator
 
             string path = $"{Environment.GetEnvironmentVariable("userprofile")}/InsertCreator";
             string positionPath = $"{Environment.GetEnvironmentVariable("userprofile")}/InsertCreator/Position.Json";
+            string corporateDesignPositionPath = $"{Environment.GetEnvironmentVariable("userprofile")}/InsertCreator/PositionCorporateDesign2026.Json";
             string bibleTextPositionPath = $"{Environment.GetEnvironmentVariable("userprofile")}/InsertCreator/BibleTextPosition.Json";
 
             PositionJsonReaderWriter positionDatajsonReaderWriter = new PositionJsonReaderWriter();
 
             PositionData positionData = new PositionData();
+            CorporateDesignPositionData corporateDesignPositionData = new CorporateDesignPositionData();
             BiblewordPositionData biblewordPositionData = new BiblewordPositionData();
 
             _log.Info("Check InsertCreator Directory");
@@ -49,6 +51,19 @@ namespace HgSoftware.InsertCreator
                 positionDatajsonReaderWriter.LoadPositionData(ref positionData, positionPath);
             }
 
+            _log.Info("Check Corporate Design Position Data file");
+            if (!File.Exists(corporateDesignPositionPath))
+            {
+                _log.Info("Create Corporate Design Position Data file");
+                var file = File.Create(corporateDesignPositionPath, 1024);
+                file.Close();
+                positionDatajsonReaderWriter.WritePositionData(corporateDesignPositionData, corporateDesignPositionPath);
+            }
+            else
+            {
+                positionDatajsonReaderWriter.LoadPositionData(ref corporateDesignPositionData, corporateDesignPositionPath);
+            }
+
             _log.Info("Check Bible Position Data file");
             if (!File.Exists(bibleTextPositionPath))
             {
@@ -62,7 +77,7 @@ namespace HgSoftware.InsertCreator
                 positionDatajsonReaderWriter.LoadPositionData(ref biblewordPositionData, bibleTextPositionPath);
             }
 
-            FadeInWriter fadeInWriter = new FadeInWriter(positionData, biblewordPositionData);
+            FadeInWriter fadeInWriter = new FadeInWriter(positionData, corporateDesignPositionData, biblewordPositionData);
 
             _log.Info("Create Ministry.json");
             FileCreate("Ministry.json", path);
@@ -71,7 +86,7 @@ namespace HgSoftware.InsertCreator
             _log.Info("Load Images");
             fadeInWriter.ResetFade();
 
-            var vm = new WindowViewModel(positionData, biblewordPositionData);
+            var vm = new WindowViewModel(positionData, corporateDesignPositionData, biblewordPositionData);
 
             _log.Info("Open Window");
             var window = new MainWindow(vm);

@@ -31,9 +31,9 @@ namespace HgSoftware.InsertCreator.ViewModel
 
         #region Public Constructors
 
-        public WindowViewModel(PositionData positionData, BiblewordPositionData biblewordPositionData)
+        public WindowViewModel(PositionData positionData, CorporateDesignPositionData corporateDesignPositionData, BiblewordPositionData biblewordPositionData)
         {
-            var fadeInWriter = new FadeInWriter(positionData, biblewordPositionData);
+            var fadeInWriter = new FadeInWriter(positionData, corporateDesignPositionData, biblewordPositionData);
             HistoryViewModel = new HistoryViewModel(fadeInWriter);
 
             _log.Info("Load Data");
