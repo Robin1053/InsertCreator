@@ -430,25 +430,22 @@ namespace HgSoftware.InsertCreator.Model
             var drawingTool = Graphics.FromImage(image);
 
             var boxRectangle = new Rectangle(_biblewordPositionData.RectanglePosition, _biblewordPositionData.SizeRectangle);
-            using (var boxBrush = new SolidBrush(_corporateDesignPositionData.BarColor))
+            using (var backgroundBrush = new SolidBrush(Color.FromArgb(_biblewordPositionData.TransparencyRectangle, _corporateDesignPositionData.BarColor)))
             using (var stripeBrush = new SolidBrush(_corporateDesignPositionData.StripeColor))
-            {
-                drawingTool.FillRectangle(boxBrush, boxRectangle);
-                drawingTool.FillRectangle(stripeBrush, new Rectangle(boxRectangle.X, boxRectangle.Y, _corporateDesignPositionData.WhiteStripeWidth, boxRectangle.Height));
-            }
-
-            
             using (var textBrush = new SolidBrush(_corporateDesignPositionData.TextColor))
             {
-                drawingTool.DrawString(
-               "Bibelwort",
-               _biblewordPositionData.FontTextHeadline,
-               textBrush, _biblewordPositionData.HeadlineTextFirstLine);
+                drawingTool.FillRectangle(backgroundBrush, boxRectangle);
+                drawingTool.FillRectangle(stripeBrush, new Rectangle(boxRectangle.X, boxRectangle.Y, _corporateDesignPositionData.WhiteStripeWidth, boxRectangle.Height));
 
                 drawingTool.DrawString(
-              $"{bibleData.BibleBook} {bibleData.BibleChapter}, {bibleData.BibleVerse}",
-              _biblewordPositionData.FontTextHeadline,
-               textBrush, _biblewordPositionData.HeadlineTextSecondLine);
+                   "Bibelwort",
+                   _biblewordPositionData.FontTextHeadline,
+                   textBrush, _biblewordPositionData.HeadlineTextFirstLine);
+
+                drawingTool.DrawString(
+                  $"{bibleData.BibleBook} {bibleData.BibleChapter}, {bibleData.BibleVerse}",
+                  _biblewordPositionData.FontTextHeadline,
+                   textBrush, _biblewordPositionData.HeadlineTextSecondLine);
             }
 
             DrawBibleText(drawingTool, bibleData.BibleText, _corporateDesignPositionData.TextColor);
