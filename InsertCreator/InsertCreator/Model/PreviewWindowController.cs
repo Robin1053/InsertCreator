@@ -10,6 +10,7 @@ namespace HgSoftware.InsertCreator.Model
 
         private readonly PreviewViewModel _previewViewModel;
         private readonly PreView _window = new PreView();
+        private int _selectedMonitorIndex = 1;
 
         #endregion Private Fields
 
@@ -30,6 +31,11 @@ namespace HgSoftware.InsertCreator.Model
             {
                 _window.Show();
             }
+        }
+
+        public void SetSelectedMonitor(int monitorIndex)
+        {
+            _selectedMonitorIndex = monitorIndex;
         }
 
         #endregion Public Methods
@@ -66,12 +72,18 @@ namespace HgSoftware.InsertCreator.Model
             _window.DataContext = _previewViewModel;
             _window.ShowInTaskbar = false;
             _window.WindowStartupLocation = System.Windows.WindowStartupLocation.Manual;
+            _window.WindowState = System.Windows.WindowState.Normal;
 
-            var secScreen = screens.First(x => !x.Primary);
-            System.Drawing.Rectangle r = secScreen.WorkingArea;
+            var screen = _selectedMonitorIndex >= 0 && _selectedMonitorIndex < screens.Count
+                ? screens[_selectedMonitorIndex]
+                : screens.FirstOrDefault(x => !x.Primary) ?? screens[1];
+            System.Drawing.Rectangle r = screen.WorkingArea;
 
             _window.Top = r.Top;
             _window.Left = r.Left;
+            _window.Width = r.Width;
+            _window.Height = r.Height;
+            _window.WindowState = System.Windows.WindowState.Maximized;
             return true;
         }
 
